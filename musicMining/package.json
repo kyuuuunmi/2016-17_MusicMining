@@ -6,12 +6,16 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "aws-sdk": "^2.7.20",
     "body-parser": "~1.15.2",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
     "ejs": "~2.5.2",
     "express": "~4.14.0",
     "morgan": "~1.7.0",
+    "multer": "^1.2.1",
+    "multer-s3": "^2.5.0",
+    "mysql": "^2.12.0",
     "serve-favicon": "~2.3.0"
   }
 }

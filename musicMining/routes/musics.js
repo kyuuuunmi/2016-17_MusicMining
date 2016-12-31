@@ -2,6 +2,8 @@
 const express = require('express');
 const router = express.Router();
 var mysql =require('mysql');
+var db_config = require('../config/db_config.json');
+
 
 var pool = mysql.createPool({
   host : db_config.host,
