@@ -7,12 +7,12 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-/*
+
 var login = require('./routes/login');
-var movies = require('./routes/movies');
+/*var movies = require('./routes/movies');
+*/
 var playlists = require('./routes/playlists');
 var musics = require('./routes/musics');
-*/
 var uploads = require('./routes/uploads');
 
 var app = express();
@@ -31,10 +31,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);/*
 app.use('/users', users);
+
+app.use('/movies',movies);*/
 app.use('/login', login);
-app.use('/movies',movies);
 app.use('/playlists', playlists);
-app.use('/musics', musics); */
+app.use('/musics', musics);
 app.use('/uploads', uploads);
 
 // catch 404 and forward to error handler
