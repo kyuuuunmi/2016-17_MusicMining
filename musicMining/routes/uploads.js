@@ -65,8 +65,8 @@ function uploading(req, res) {
             console.log("getConnection Error" + error);
             res.sendStatus(500);
         } else {
-            var isAlbum, isMusician, isLyricist, isComposer;
-            var album_id, music_id, musician_id, lyricist_id, composer_id;
+            var isAlbum, isMusician, isLyricist, isComposer, isfeaturing;
+            var album_id, music_id, musician_id, lyricist_id, composer_id, featuring_id;
 
             console.log("호스팅완료");
             async.series([
@@ -308,6 +308,79 @@ function uploading(req, res) {
                         }
                     },
                     function(callback) {
+                        ///피처링
+
+                        console.log("피처링 검색");
+                        connection.query('select musician_id from musician where musician_name = ?', [req.body.featuring_name],
+                            function(err, rows) {
+                                if (err) {
+                                    callback(err);
+                                } else {
+                                    console.log("피처링 중복 검색중");
+
+                                    if (rows.length === 0) {
+                                        isfeaturing = 0;
+
+                                    } else {
+                                        isfeaturing = 1;
+
+
+                                    }
+
+                                    callback(null, rows);
+                                }
+                            });
+                    },
+                    function(callback) {
+                        // 피처링 가수 삽입
+
+                        if (isfeaturing === 0) {
+                            console.log("피처링가수 삽입");
+                            var sql_musician = 'insert into musician (musician_name) values(?)';
+                            var insert_musician = [req.body.featuring_name];
+
+                            connection.query(sql_musician, insert_musician, function(err, rows) {
+                                if (err) {
+                                    callback(err);
+                                    //    connection.release();
+                                } else {
+                                    console.log("피처링 삽입했습니다");
+                                    callback(null, rows);
+                                    //  connection.release();
+                                }
+                            });
+
+                        } else {
+                            callback(null, 0);
+                        }
+
+                    },
+                    function(callback) {
+                        // 피처링
+                        if (isfeaturing === 0) {
+                            console.log("피처링 삽입 후 musician_id받아오기");
+                            connection.query('select musician_id from musician where musician_name = ?', [req.body.featuring_name],
+                                function(err, rows) {
+                                    if (err) {
+                                        callback(err);
+                                    } else {
+                                        console.log("musician_id받아오는중");
+
+                                        if (rows.length === 0) {
+                                            console.log("피처링 검색이 안돼요!");
+                                            callback(err);
+                                        } else {
+                                            isfeaturing = 1;
+                                            featuring_id = rows[0].musician_id;
+                                            console.log('featuring_id = ' + featuring_id);
+                                            callback(null, rows);
+                                        }
+                                    }
+                                });
+                        } else {
+                            callback(null, 0);
+                        }
+                    }, function(callback) {
                         //////////////작사가
 
                         console.log("작사가 검색");
@@ -504,6 +577,23 @@ function uploading(req, res) {
                                 //    connection.release();
                             } else {
                                 console.log("음악 & 작사가 연결 완료");
+                                callback(null, rows);
+                                //  connection.release();
+                            }
+                        });
+                    },function(callback) {
+                        // 음악 & 피처링 연결
+
+                        console.log("음악 & 피처링 연결");
+                        var sql_link = 'insert into role (role_num,music_id,musician_id) values(?,?,?)';
+                        var insert_link = [ROLE_FEATURING, music_id, featuring_id];
+
+                        connection.query(sql_link, insert_link, function(err, rows) {
+                            if (err) {
+                                callback(err);
+                                //    connection.release();
+                            } else {
+                                console.log("음악 & 피처링 연결 완료");
                                 callback(null, rows);
                                 //  connection.release();
                             }
