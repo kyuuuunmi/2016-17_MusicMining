@@ -16,8 +16,6 @@ router.route('/')
     .get(home)
 
 function home(req, res) {
-    var list = [];
-    var rolls = [];
     pool.getConnection(function(err, connection) {
             if (err) {
                 console.log("getConnection Error" + err);
