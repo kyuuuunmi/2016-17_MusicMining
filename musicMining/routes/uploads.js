@@ -9,7 +9,10 @@ var db_config = require('../config/db_config.json');
 aws.config.loadFromPath('./config/aws_config.json');
 
 var s3 = new aws.S3();
-
+const ROLE_SINGER = 1;
+const ROLE_COMPOSER = 2;
+const ROLE_LYRICiST = 3;
+const ROLE_FEATURING = 4;
 var upload = multer({
     storage: multerS3({
         s3: s3,
@@ -300,9 +303,8 @@ function uploading(req, res) {
                                     //  connection.release();
                                 }
                             });
-                        }
-                        else {
-                          callback(null,0);
+                        } else {
+                            callback(null, 0);
                         }
                     },
                     function(callback) {
@@ -457,8 +459,8 @@ function uploading(req, res) {
                         // 음악 & 가수 연결
 
                         console.log("음악 & 가수 연결");
-                        var sql_link = 'insert into role (role,music_id,musician_id) values(?,?,?)';
-                        var insert_link = ['가수', music_id, musician_id];
+                        var sql_link = 'insert into role (role_num,music_id,musician_id) values(?,?,?)';
+                        var insert_link = [ROLE_SINGER, music_id, musician_id];
 
                         connection.query(sql_link, insert_link, function(err, rows) {
                             if (err) {
@@ -475,8 +477,8 @@ function uploading(req, res) {
                         // 음악 & 작곡가 연결
 
                         console.log("음악 & 작곡가 연결");
-                        var sql_link = 'insert into role (role,music_id,musician_id) values(?,?,?)';
-                        var insert_link = ['작곡가', music_id, composer_id];
+                        var sql_link = 'insert into role (role_num,music_id,musician_id) values(?,?,?)';
+                        var insert_link = [ROLE_COMPOSER, music_id, composer_id];
 
                         connection.query(sql_link, insert_link, function(err, rows) {
                             if (err) {
@@ -493,8 +495,8 @@ function uploading(req, res) {
                         // 음악 & 작사가 연결
 
                         console.log("음악 & 작사가 연결");
-                        var sql_link = 'insert into role (role,music_id,musician_id) values(?,?,?)';
-                        var insert_link = ['작사가', music_id, lyricist_id];
+                        var sql_link = 'insert into role (role_num,music_id,musician_id) values(?,?,?)';
+                        var insert_link = [ROLE_LYRICiST, music_id, lyricist_id];
 
                         connection.query(sql_link, insert_link, function(err, rows) {
                             if (err) {
