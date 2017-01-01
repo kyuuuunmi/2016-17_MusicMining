@@ -5,10 +5,6 @@ const router = express.Router();
 const db_config = require('../config/db_config.json')
 const msg = require('../message.js')
 
-/*"host" : "sopt-19th.camlg6m4m2x5.ap-northeast-2.rds.amazonaws.com",
-"user" : "yuuuunmi",
-"password" : "tbqkenqk^^!",*/
-
 const pool = mysql.createPool(db_config);
 
 // router.route('/')
