@@ -26,7 +26,7 @@ function EmailManager() {
             gender:   gender,
             birth:    birth
         });
-        var url = 'http://localhost:3000/login?' + query;
+        var url = 'http://52.78.156.235:3000/login?' + query;
         return {
             from:     '혀누 <gusdn6867@naver.com>',
             to:       user_id,
