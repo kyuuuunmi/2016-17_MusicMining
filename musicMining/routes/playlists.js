@@ -40,6 +40,7 @@ function getMuiscPlaylist(req, res) {
             console.log("getConnection error" + error);
             res.status(500).send(error);
         } else {
+          // 쿼리 한번 날려서 featuring 있는지 검색 하고 와야할듯
           //  sql = 'select m.music_id, m.title, m.music_url, a.album_image_url, p.musician_name from play_list l join music m on l.music_id = m.music_id join album a on m.album_id = a.album_id join role r on m.music_id = r.music_id join role f on f.music_id = m.music_id join musician p on r.musician_id = p.musician_id  where l.user_id = ? and r.role= ? and f.role'
             sql ='select m.music_id, m.title,  p.musician_name as singer, fe.musician_name as feat, m.music_url, a.album_image_url from play_list l join music m on l.music_id = m.music_id join album a on m.album_id = a.album_id join role r on m.music_id = r.music_id join role f on f.music_id = m.music_id join musician p on r.musician_id = p.musician_id join musician fe on fe.musician_id = f.musician_id where l.user_id = ? and r.role_num= ? and f.role_num = ? '
             connection.query(sql, [req.params.user_id, 1, 4], function(error, rows) {
