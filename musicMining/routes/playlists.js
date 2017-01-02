@@ -3,6 +3,8 @@ var mysql = require('mysql');
 var async = require('async');
 var msg = require('../message.js')
 var db_config = require('../config/db_config.json');
+var msg = require('../message.js');
+
 
 var router = express.Router();
 var pool = mysql.createPool(db_config);
@@ -25,9 +27,10 @@ function addMuiscPlaylist(req, res) {
                     console.log("Insertion Error" + error);
                     res.status(500).send(error);
                 } else {
-                    res.status(200).send({
-                        result: rows
-                    });
+                    res.status(200).send(msg(0, {data : rows}));
+                    // res.status(200).send({
+                    //     result: rows
+                    // });
                 }
                 connection.release();
             });
@@ -48,8 +51,9 @@ function getMuiscPlaylist(req, res) {
                     console.log(error);
                     res.status(500).send(error);
                 } else {
-                    console.log(rows);
-                    res.status(200).send(rows);
+                    //console.log(rows);
+                    res.status(200).send(msg(0, rows));
+                    //res.status(200).send(rows);
                 }
             });
         }
@@ -67,7 +71,7 @@ function deleteMuiscPlaylist(req, res) {
                     res.status(500).send(error);
                     connection.release();
                 } else {
-                    res.status(200).send(rows);
+                    res.status(200).send(msg(0, {data : rows}));
                     connection.release();
                 }
             });

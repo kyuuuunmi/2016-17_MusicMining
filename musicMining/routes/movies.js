@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 var async = require('async');
 var mysql = require('mysql');
+
 var db_config = require('../config/db_config')
+var msg = require('../message.js');
 
 var pool = mysql.createPool(db_config);
 
@@ -25,12 +27,10 @@ function home(req, res) {
                 connection.query(query, function(error, rows) {
                     if (error) {
                         console.log("Connection Error" + error);
-                        res.status(200).send(err);
+                        res.status(500).send(err)
                         connection.release();
                     } else {
-                        res.status(200).send({
-                            data: rows
-                        });
+                        res.status(200).send(msg(0, rows));
                         connection.release();
                     }
                 });

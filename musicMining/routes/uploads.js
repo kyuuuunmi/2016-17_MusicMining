@@ -7,6 +7,7 @@ var multerS3 = require('multer-s3');
 var mysql = require('mysql');
 var db_config = require('../config/db_config.json');
 aws.config.loadFromPath('./config/aws_config.json');
+var msg = require('../message.js');
 
 var s3 = new aws.S3();
 const ROLE_SINGER = 1;
@@ -638,10 +639,7 @@ function uploading(req, res) {
                     if (err) res.status(500).send(err);
                     else {
                         connection.release();
-                        res.status(200).send({
-                            result: 'create'
-
-                        });
+                        res.status(200).send(msg(0, 'create'));
                     }
                 });
         }
