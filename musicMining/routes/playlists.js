@@ -61,7 +61,7 @@ function deleteMuiscPlaylist(req, res) {
             console.log("getConnection error" + error);
             res.sendStatus();
         } else {
-            connection.query('delete  from play_list where user_id and music_id = ?= ?  ', [req.body.user_id, req.body.music_id], function(error, rows) {
+            connection.query('delete from play_list where user_id = ? and music_id = ?  ', [req.body.user_id, req.body.music_id], function(error, rows) {
                 if (error) {
                     console.log("Delete Error" + error);
                     res.status(500).send(error);
