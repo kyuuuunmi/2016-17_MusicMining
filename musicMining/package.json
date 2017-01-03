@@ -17,6 +17,8 @@
     "multer": "^1.2.1",
     "multer-s3": "^2.5.0",
     "mysql": "^2.12.0",
+    "nodemailer": "^2.7.0",
+    "nodemailer-smtp-transport": "^2.7.2",
     "series": "^0.3.3",
     "serve-favicon": "~2.3.0"
   }

@@ -91,7 +91,10 @@ function getMuiscPlaylist(req, res) {
                     res.status(200).send(msg(0, rows));
                     //callback(null, rows[0]);
                 }
+
             });
+
+		connection.release();
             /*
                         async.series([
                                 function(callback) {
