@@ -26,17 +26,46 @@ function addMuiscPlaylist(req, res) {
             console.log("getConnection error" + error);
             res.status(500).send(error);
         } else {
-            connection.query('insert into play_list(user_id, music_id) values(?,?) ', [req.body.user_id, req.body.music_id], function(error, rows) {
-                if (error) {
-                    console.log("Insertion Error" + error);
-                    res.status(500).send(error);
-                } else {
-                    res.status(200).send(msg(0, {
-                        data: rows
-                    }));
-                }
-                connection.release();
-            });
+            var sql_search = 'select music_id from musicmining.play_list where user_id = ? and music_id = ?';
+            async.series([
+
+                    function(callback) {
+                        // 플레이리스트에 이미 음악이 있는지 요청
+                        connection.query(sql_search, [req.body.user_id, req.body.music_id], function(error, rows) {
+                            if (error) {
+                                callback(msg(1, error));
+                                console.log(error);
+                            } else {
+                                if (rows.length === 0) callback(null, 'the music is not in the playlist');
+                                else callback(msg(2, 'duplicate music'));
+                            }
+                        });
+                    },
+                    function(callback) {
+                        // 플레이리스트에 음악이 없으면 삽입
+                        connection.query('insert into play_list(user_id, music_id) values(?,?) ', [req.body.user_id, req.body.music_id], function(error, rows) {
+                            if (error) {
+                                callback(msg(1, error));
+                                console.log(error);
+                            } else {
+                                callback(null, msg(0, {}));
+                            }
+                        });
+                    }
+                ],
+                function(err, result) {
+                    if (err)
+                        if (err.err === 0) res.status(200).send(err);
+                        else res.status(500).send(err);
+                    else {
+                        res.status(200).send(msg(0, {}));
+                        connection.release();
+                    }
+
+                });
+
+
+
         }
     });
 }
@@ -58,54 +87,54 @@ function getMuiscPlaylist(req, res) {
                     res.status(500).send(error);
                     console.log(error);
                 } else {
-                    music_id = rows[0].music_id;
+                    //music_id = rows[0].music_id;
                     res.status(200).send(msg(0, rows));
                     //callback(null, rows[0]);
                 }
             });
-/*
-            async.series([
-                    function(callback) {
-                        // 피처링 제외한 가수 탐색
-                        connection.query(sql_singer, [req.params.user_id, ROLE_SINGER], function(error, rows) {
-                            if (error) {
-                                callback(msg(1, err));
-                                console.log(error);
-                            } else {
-                                music_id = rows[0].music_id;
-                                callback(null, rows[0]);
-                            }
-                        });
-                    },
-                    function(callback) {
-                        connection.query(sql_feat, [music_id, ROLE_FEATURING],
-                            function(err, rows) {
-                                if (err) {
-                                    callback(msg(1, err));
-                                } else {
-                                    if (rows.length === 0)
-                                        callback(null, "");
-                                    else callback(null, rows[0]);
+            /*
+                        async.series([
+                                function(callback) {
+                                    // 피처링 제외한 가수 탐색
+                                    connection.query(sql_singer, [req.params.user_id, ROLE_SINGER], function(error, rows) {
+                                        if (error) {
+                                            callback(msg(1, err));
+                                            console.log(error);
+                                        } else {
+                                            music_id = rows[0].music_id;
+                                            callback(null, rows[0]);
+                                        }
+                                    });
+                                },
+                                function(callback) {
+                                    connection.query(sql_feat, [music_id, ROLE_FEATURING],
+                                        function(err, rows) {
+                                            if (err) {
+                                                callback(msg(1, err));
+                                            } else {
+                                                if (rows.length === 0)
+                                                    callback(null, "");
+                                                else callback(null, rows[0]);
 
 
+                                            }
+                                        });
                                 }
-                            });
-                    }
-                ],
-                function(err, result) {
-                    if (err)
-                        if (err.err === 0) res.status(200).send(err);
-                        else res.status(500).send(err);
-                    else {
-                        data = result[0];
-                        data.featuring_musician_name = result[1];
-                        res.status(200).send(msg(0, data));
-                        connection.release();
-                    }
+                            ],
+                            function(err, result) {
+                                if (err)
+                                    if (err.err === 0) res.status(200).send(err);
+                                    else res.status(500).send(err);
+                                else {
+                                    data = result[0];
+                                    data.featuring_musician_name = result[1];
+                                    res.status(200).send(msg(0, data));
+                                    connection.release();
+                                }
 
-                });
-        */
-      }
+                            });
+                    */
+        }
     });
 }
 
@@ -115,15 +144,36 @@ function deleteMuiscPlaylist(req, res) {
             console.log("getConnection error" + error);
             res.sendStatus();
         } else {
-            connection.query('delete from play_list where user_id = ? and music_id = ?  ', [req.body.user_id, req.body.music_id], function(error, rows) {
-                if (error) {
-                    console.log("Delete Error" + error);
-                    res.status(500).send(error);
-                    connection.release();
-                } else {
-                    res.status(200).send(msg(0, {
-                        data: rows
-                    }));
+            var sql_search = 'select music_id from musicmining.play_list where user_id = ? and music_id = ?';
+            async.series([
+                function(callback) {
+                    connection.query(sql_search, [req.body.user_id, req.body.music_id], function(error, rows) {
+                        if (error) {
+                            callback(msg(1, error));
+                            console.log(error);
+                        } else {
+                            if (rows.length !== 0) callback(null, 'the music is in the playlist');
+                            else callback(msg(2, 'there is no music that name'));
+                        }
+                    });
+
+                },
+                function(callback) {
+                    connection.query('delete from play_list where user_id = ? and music_id = ?  ', [req.body.user_id, req.body.music_id], function(error, rows) {
+                        if (error) {
+                            console.log("Delete Error" + error);
+                            res.status(500).send(error);
+                        } else {
+                            callback(null, msg(0, {}));
+                        }
+                    });
+                }
+            ], function(err, result) {
+                if (err)
+                    if (err.err === 0) res.status(200).send(err);
+                    else res.status(500).send(err);
+                else {
+                    res.status(200).send(msg(0, {}));
                     connection.release();
                 }
             });
