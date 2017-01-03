@@ -18,7 +18,7 @@ router.route('/regist')
       .post(regist)
 
 function login(req, res) {
-    if (req.body.case == 0) {
+    if (req.body.case === 0) {
         userCheckQuery = 'select user_id from user where user_id=?';
         userCheckValue = [req.body.user_id];
     } else {
