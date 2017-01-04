@@ -1,4 +1,3 @@
-//like unlike~~
 const express = require('express');
 const router = express.Router();
 var mysql = require('mysql');
@@ -18,23 +17,47 @@ function like(req, res) {
     pool.getConnection(function(err, connection) {
         if (err) {
             console.log("getConnection Error" + err);
-            //res.send(err);
-            res.status(500).send(err)
-
+            res.status(500).send(err);
         } else {
-            connection.query('insert into music_like (user_id, music_id) values (?,?);', [req.body.user_id, req.body.music_id], function(err, rows) {
-                if (err) {
-                    console.log("Connection Error" + err);
-                    res.status(500).send(err);
-                    //res.send(err);
-                } else {
-                    console.log("liked");
-                    res.status(200).send(msg(0, {}));
-                    //res.send(rows);
+
+            var sql_search = 'select like_id from musicmining.music_like where user_id = ? and music_id = ?';
+            var sql_insert = 'insert into music_like (user_id, music_id) values (?,?)';
+            var sql_value = [req.body.user_id, req.body.music_id];
+
+            async.series([
+                function(callback) {
+                    connection.query(sql_search, sql_value, function(err, rows) {
+                        if (err) {
+                            callback(msg(1, error));
+                            console.log(error);
+                        } else {
+                            if (rows.length === 0) callback(null, 'there is no data with like');
+                            else callback(msg(2, 'duplicate likes'));
+                        }
+                    });
+                },
+                function(callback) {
+                    connection.query(sql_insert, sql_value, function(err, rows) {
+                        if (err) {
+                            callback(msg(1, err));
+                            console.log("Connection Error" + err);
+                        } else {
+                            callback(null, msg(0, {}));
+                        }
+
+                    });
                 }
+            ], function(err, result) {
+                if (err)
+                    if (err.err === 2) res.status(200).send(err);
+                    else res.status(500).send(err);
+                else
+                    res.status(200).send(msg(0, {}));
 
                 connection.release();
+
             });
+
         }
     });
 
@@ -46,22 +69,45 @@ function unlike(req, res) {
         if (err) {
             console.log("getConnection Error" + err);
             res.send(err);
-
         } else {
-            connection.query('delete from music_like where user_id= ? and music_id=?;', [req.body.user_id, req.body.music_id], function(err, rows) {
-                if (err) {
-                    console.log("Connection Error" + err);
-                    //res.send(err);
-                    res.status(500).send(err)
-                    connection.release();
-                } else {
-                    console.log("unliked");
-                    res.status(200).send(msg(0, {}));
-                    //res.send(rows);
 
-                    connection.release();
+            var sql_search = 'select like_id from musicmining.music_like where user_id = ? and music_id = ?';
+            var sql_delete = 'delete from music_like where user_id= ? and music_id=? ';
+            var sql_value = [req.body.user_id, req.body.music_id];
+
+            async.series([
+                function(callback) {
+                    connection.query(sql_search, sql_value, function(err, rows) {
+                        if (err) {
+                            callback(msg(1, err));
+                            console.log(err);
+                        } else {
+                            if (rows.length !== 0) callback(null, 'the music is in');
+                            else callback(msg(2, 'the music is not liked'));
+                        }
+                    })
+                },
+                function(callback) {
+                    connection.query(sql_delete, sql_value, function(err, rows) {
+                        if (err) {
+                            console.log("Connection Error" + err);
+                            callback(msg(1, error));
+                        } else {
+                            callback(null, msg(0, {}));
+                        }
+                    });
                 }
-            });
+            ], function(err, result) {
+                if (err)
+                    if (err.err === 0) res.status(200).send(err);
+                    else res.status(500).send(err);
+                else
+                    res.status(200).send(msg(0, {}));
+                connection.release();
+
+            })
+
+
         }
     });
 }
@@ -118,10 +164,9 @@ function info(req, res) {
                 ],
                 function(err, result) {
                     if (err) {
-                      connection.release();
-                      res.send(err);
-                    }
-                    else {
+                        connection.release();
+                        res.send(err);
+                    } else {
                         data = result[0];
                         data.likes = result[1][0].likes;
                         data.composer = result[2];
@@ -129,7 +174,7 @@ function info(req, res) {
                         connection.release();
                     }
                 }
-              );
+            );
         }
     });
 }
