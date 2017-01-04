@@ -26,22 +26,8 @@ function addMuiscPlaylist(req, res) {
             console.log("getConnection error" + error);
             res.status(500).send(error);
         } else {
-            var sql_musicSearch = 'select music_id from music where music_id = ?';
             var sql_search = 'select music_id from musicmining.play_list where user_id = ? and music_id = ?';
             async.series([
-                    function(callback) {
-                        connection.query(sql_musicSearch, [req.body.music_id], function(error, rows) {
-                            if (error) {
-                                callback(msg(1, error));
-                                console.log(error);
-                            } else {
-                                if (rows.length !== 0) callback(null, 'the music is in lists');
-                                else {
-                                    callback(msg(3, 'there is no music_id'));
-                                }
-                            }
-                        });
-                    },
                     function(callback) {
                         // 플레이리스트에 이미 음악이 있는지 요청
                         connection.query(sql_search, [req.body.user_id, req.body.music_id], function(error, rows) {
@@ -68,7 +54,7 @@ function addMuiscPlaylist(req, res) {
                 ],
                 function(err, result) {
                     if (err)
-                        if (err.err === 2 || err.err === 3) res.status(200).send(err);
+                        if (err.err === 2) res.status(200).send(err);
                         else res.status(500).send(err);
                     else
                         res.status(200).send(msg(0, {}));
@@ -86,23 +72,8 @@ function deleteMuiscPlaylist(req, res) {
             console.log("getConnection error" + error);
             res.sendStatus();
         } else {
-            var sql_musicSearch = 'select music_id from music where music_id = ?';
-
             var sql_search = 'select music_id from musicmining.play_list where user_id = ? and music_id = ?';
             async.series([
-                function(callback) {
-                    connection.query(sql_musicSearch, [req.body.music_id], function(error, rows) {
-                        if (error) {
-                            callback(msg(1, error));
-                            console.log(error);
-                        } else {
-                            if (rows.length !== 0) callback(null, 'the music is in lists');
-                            else {
-                                callback(msg(3, 'there is no music_id'));
-                            }
-                        }
-                    });
-                },
                 function(callback) {
                     connection.query(sql_search, [req.body.user_id, req.body.music_id], function(error, rows) {
                         if (error) {
@@ -127,7 +98,7 @@ function deleteMuiscPlaylist(req, res) {
                 }
             ], function(err, result) {
                 if (err)
-                    if (err.err === 0 || err.err ===3) res.status(200).send(err);
+                    if (err.err === 0) res.status(200).send(err);
                     else res.status(500).send(err);
                 else {
                     res.status(200).send(msg(0, {}));
