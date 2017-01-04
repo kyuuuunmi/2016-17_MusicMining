@@ -23,7 +23,7 @@ function login(req, res) {
         userCheckValue = [req.body.user_id];
     } else {
         userCheckQuery = 'select user_id, passwd from user where user_id=? and passwd=?';
-        scrypt.verifyHashSync(hashedPassword, 입력패스워드);
+        //scrypt.verifyHashSync(hashedPassword, 입력패스워드);
         userCheckValue = [req.body.user_id, req.body.passwd];
     }
     var registSocialUserQuery = 'insert into user(user_id, prof_image_url, name, gender, birth) values(?, ?, ?, ?, ?)';
@@ -81,8 +81,6 @@ function regist(req, res) {
     var userCheckQuery2 = 'select user_id from user where user_id = ?';
     var userCheckValue2 = [req.body.user_id];
 
-
-
     var eManager = new emailManager();
     var smtpTransporter = eManager.smtpTransporter();
     var mailOptions = eManager.mailOptions(req.body.user_id, req.body.passwd, req.body.name, req.body.gender, req.body.birth);
@@ -129,9 +127,9 @@ function regist(req, res) {
 }
 
 function receiveMail(req, res) {
-    var registUserQuery = 'insert into user(user_id, passwd, name, gender, birth, token) values(?, ?, ?, ?, ?,?)';
-    var passwdHashed = scrypt.passwdHashed(userCheckValue2, 0.1);
-    var registUserValue = [req.query.user_id, req.query.passwd, req.query.name, req.query.gender, req.query.birth, passwdHashed];
+    var registUserQuery = 'insert into user(user_id, passwd, name, gender, birth) values(?, ?, ?, ?, ?)';
+    //var passwdHashed = scrypt.passwdHashed(userCheckValue2, 0.1);
+    var registUserValue = [req.query.user_id, req.query.passwd, req.query.name, req.query.gender, req.query.birth];
     console.log(registUserValue);
     pool.getConnection(function(err, conn) {
         if (err) {
