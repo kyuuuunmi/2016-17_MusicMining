@@ -63,9 +63,6 @@ function addMuiscPlaylist(req, res) {
                     connection.release();
 
                 });
-
-
-
         }
     });
 }
