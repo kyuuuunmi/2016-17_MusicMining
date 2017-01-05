@@ -13,6 +13,7 @@ const ROLE_LYRICiST = 3;
 const ROLE_FEATURING = 4;
 
 router.route('/')
+    .get(getMusicAll)
     .post(addMuiscPlaylist)
     .delete(deleteMuiscPlaylist);
 
@@ -116,25 +117,39 @@ function getMuiscPlaylist(req, res) {
             res.status(500).send(error);
         } else {
 
-            var sql_singer = 'select m.music_id, m.title, m.music_url, a.album_image_url, p.musician_name from play_list l join music m on l.music_id = m.music_id join album a on m.album_id = a.album_id join role r on m.music_id = r.music_id join musician p on r.musician_id = p.musician_id where l.user_id = ? and r.role_num= ?';
             var sql_singer2 = 'select m.music_id, m.title, m.music_url, p.musician_name as musician_name, a.album_image_url from play_list l join music m on l.music_id = m.music_id join album a on m.album_id = a.album_id join role r on m.music_id = r.music_id join musician p on r.musician_id = p.musician_id where l.user_id = ? and r.role_num= ?';
-            var sql_feat = 'select musician_name as featuring_musician_name  from role f join music m on f.music_id = m.music_id join musician fe on fe.musician_id = f.musician_id where f.music_id = ? and f.role_num = ?';
-            var music_id;
             connection.query(sql_singer2, [req.params.user_id, ROLE_SINGER], function(error, rows) {
                 if (error) {
-                    //callback(msg(1, err));
                     res.status(500).send(error);
                     console.log(error);
                 } else {
-                    //music_id = rows[0].music_id;
                     res.status(200).send(msg(0, rows));
-                    //callback(null, rows[0]);
                 }
             });
             connection.release();
 
         }
     });
+}
+function getMusicAll(req, res){
+  pool.getConnection(function(error, connection){
+    if(error){
+      console.log("getConnection error" + error);
+      res.status(500).send(error);
+    } else{
+      var sql_allMusic = 'select m.music_id, m.title, m.music_url, p.musician_name as musician_name, a.album_image_url from music m join album a on m.album_id = a.album_id join role r on m.music_id = r.music_id join musician p on r.musician_id = p.musician_id where r.role_num= ?';
+      connection.query(sql_allMusic, [ROLE_SINGER], function(error, rows){
+        if(error){
+          res.status(500).send(error);
+          console.log(error);
+        } else {
+          res.status(200).send(msg(0,rows));
+        }
+      });
+      connection.release();
+
+    }
+  });
 }
 /* heonu
 function getMuiscPlaylist(req, res) {
@@ -143,6 +158,9 @@ function getMuiscPlaylist(req, res) {
               console.log("getConnection Error" + err);
               res.sendStatus(0, null);
           } else {
+          var sql_feat = 'select musician_name as featuring_musician_name  from role f join music m on f.music_id = m.music_id join musician fe on fe.musician_id = f.musician_id where f.music_id = ? and f.role_num = ?';
+          var sql_singer = 'select m.music_id, m.title, m.music_url, a.album_image_url, p.musician_name from play_list l join music m on l.music_id = m.music_id join album a on m.album_id = a.album_id join role r on m.music_id = r.music_id join musician p on r.musician_id = p.musician_id where l.user_id = ? and r.role_num= ?';
+
               async.waterfall([
                   function(callback) {
                       connection.query("select m.music_id, m.title, m.music_url, a.album_image_url from play_list p join music m join album a on m.music_id=p.music_id and m.album_id=a.album_id where user_id=?", [req.params.user_id], function(err, rows) {
