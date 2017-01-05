@@ -17,11 +17,11 @@ function EmailManager() {
 
     EmailManager.prototype.mailOptions = function(user_id, user_pw) {
         return {
-            from:     '혀누 <gusdn6867@naver.com>',
+            from:     'MusicMining <gusdn6867@naver.com>',
             to:       user_id,
-            subject:  'MusicMining',
+            subject:  'MusicMining 비밀번호 찾기',
             text:     'MusicMining 비밀번호 찾기',
-            html:     '<b>🐴MusicMining🐴</b><br> ' + user_id + '님의 비밀번호는 ' + user_pw + '입니다 </a>'
+            html:     'MusicMining<br><br><br> ' + user_id + '님의 비밀번호는 ' + user_pw + '입니다 </a>'
         }
     }
 }

@@ -28,11 +28,11 @@ function EmailManager() {
         });
         var url = 'http://52.78.156.235:3000/login?' + query;
         return {
-            from:     '혀누 <gusdn6867@naver.com>',
+            from:     'MusicMining <gusdn6867@naver.com>',
             to:       user_id,
-            subject:  'MusicMining',
+            subject:  'MusicMining 회원가입',
             text:     'MusicMining 회원가입',
-            html:     '<b>🐴MusicMining🐴</b><br><a href=' + url + '>회원가입 ㄱㄱ</a>',
+            html:     'MusicMining<br><br><br><a href=' + url + '>Music Mining 회원가입을 위해 이 링크를 클릭해 주세요.</a>',
             checksum: checksum
         }
     }
