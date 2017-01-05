@@ -8,11 +8,10 @@ const msg = require('../message.js');
 const emailManager = require('../emailmanager.js');
 const passwdManager = require('../passwdmanager.js');
 const pool = mysql.createPool(db_config);
-var secret_key='뮤직마이닝짱';
+var key=require('../config/key.json');
 var checksum;
+var secret_key = key.crypto_key;
 
-//var scrypt = require('scrypt-js');
-//var scryptParameters = scrypt.params(0.1);
 
 router.route('/')
     .post(login)
