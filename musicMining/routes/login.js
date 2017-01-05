@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const async = require('async');
 var crypto = require('crypto');
 const router = express.Router();
+//var emailsuccess=require('../views/registered.html');
 const db_config = require('../config/db_config.json');
 const msg = require('../message.js');
 const emailManager = require('../emailmanager.js');
@@ -155,7 +156,7 @@ function receiveMail(req, res) {
 
                 conn.query(registUserQuery, registUserValue, function(err, rows) {
                     if (err) res.status(500).send('<h2>DB 쿼리 에러</h2>');
-                    else res.status(200).send('<h2>회원가입 성공~!^^</h2>');
+                    else res.render('registered');
                 });
             } else res.status(500).send('<h2>회원가입 실패, 경로가 틀림</h2>');
         }
