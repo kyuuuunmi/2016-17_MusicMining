@@ -10,7 +10,7 @@ var pool = mysql.createPool(db_config);
 router.route('/')
     .post(like)
     .delete(unlike)
-router.route('/:music_id')
+    router.route('/')
     .get(info)
 
 function like(req, res) {
@@ -169,7 +169,7 @@ function info(req, res) {
                     } else {
                         data = result[0];
                         data.likes = result[1][0].likes;
-                        data.composer = result[2];
+                        data.composers = result[2];
                         res.status(200).send(msg(0, data));
                         connection.release();
                     }
