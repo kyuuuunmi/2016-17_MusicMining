@@ -33,11 +33,10 @@ function login(req, res) {
 
         userCheckQuery = 'select user_id, passwd from user where user_id=? and passwd=?';
         //console.log(req.body.passwd);
-console.log("!!!!!!!!"+req.body.passwd);
         encryption.update(req.body.passwd,'base64','binary');
         var encrypted=encryption.final('binary');
 
-        console.log("user pw encord : " + encrypted);
+
         userCheckValue = [req.body.user_id, encrypted];
     }
     var registSocialUserQuery = 'insert into user(user_id, prof_image_url, name, gender, birth) values(?, ?, ?, ?, ?)';
@@ -187,15 +186,8 @@ function findPw(req, res) {
                             if (rows.length < 1) {
                                 callback(msg(1, 'not user'));
                             } else {
-                                console.log(rows[0].passwd);
                                 decryption.update(rows[0].passwd,'binary','base64');
                                 var decrypted=decryption.final('base64');
-                            /*    b=decrypted;
-                                if(a==b) console.log("맞는데~~~");
-                                else {console.log('aaaaaaaaaa:'+a+'\n');
-                                console.log('bbbbbbbb:'+b+'\n');
-                              }*/
-                                console.log(decrypted);
                                 mailOptions = eManager.mailOptions(req.body.user_id, decrypted);
                                 callback(null, 'user');
                             }
