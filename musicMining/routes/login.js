@@ -1,12 +1,14 @@
 const express = require('express');
 const mysql = require('mysql');
 const async = require('async');
+var crypto = require('crypto');
 const router = express.Router();
 const db_config = require('../config/db_config.json');
 const msg = require('../message.js');
 const emailManager = require('../emailmanager.js');
 const passwdManager = require('../passwdmanager.js');
 const pool = mysql.createPool(db_config);
+var secret_key='뮤직마이닝짱';
 var checksum;
 
 //var scrypt = require('scrypt-js');
@@ -27,9 +29,16 @@ function login(req, res) {
         userCheckQuery = 'select user_id from user where user_id=?';
         userCheckValue = [req.body.user_id];
     } else {
+      var encryption = crypto.createCipher('aes128', secret_key);
+
         userCheckQuery = 'select user_id, passwd from user where user_id=? and passwd=?';
-        //scrypt.verifyHashSync(hashedPassword, 입력패스워드);
-        userCheckValue = [req.body.user_id, req.body.passwd];
+        //console.log(req.body.passwd);
+console.log("!!!!!!!!"+req.body.passwd);
+        encryption.update(req.body.passwd,'base64','binary');
+        var encrypted=encryption.final('binary');
+
+        console.log("user pw encord : " + encrypted);
+        userCheckValue = [req.body.user_id, encrypted];
     }
     var registSocialUserQuery = 'insert into user(user_id, prof_image_url, name, gender, birth) values(?, ?, ?, ?, ?)';
     var registSocialUserValue = [req.body.user_id, req.body.prof_image_url, req.body.name, req.body.gender, req.body.birth];
@@ -133,7 +142,10 @@ function receiveMail(req, res) {
     var registUserQuery = 'insert into user(user_id, passwd, name, gender, birth) values(?, ?, ?, ?, ?)';
     //scrypt.hash.config.outputEncoding = "hex";
     //var passwdHashed = scrypt.hashedPassword(req.query.passwd, 0.1);
-    var registUserValue = [req.query.user_id, req.query.passwd, req.query.name, req.query.gender, req.query.birth];
+    var encryption = crypto.createCipher('aes128', secret_key);
+    encryption.update(req.query.passwd,'base64','binary');
+    var encrypted=encryption.final('binary');
+    var registUserValue = [req.query.user_id, encrypted, req.query.name, req.query.gender, req.query.birth];
     console.log(registUserValue);
     pool.getConnection(function(err, conn) {
         if (err) {
@@ -141,6 +153,7 @@ function receiveMail(req, res) {
             console.log('db connection err: ' + err);
         } else {
             if (req.query.checksum == checksum) {
+
                 conn.query(registUserQuery, registUserValue, function(err, rows) {
                     if (err) res.status(500).send('<h2>DB 쿼리 에러</h2>');
                     else res.status(200).send('<h2>회원가입 성공~!^^</h2>');
@@ -155,8 +168,9 @@ function findPw(req, res) {
     var val_userId = [req.body.user_id];
     var eManager = new passwdManager();
     var smtpTransporter = eManager.smtpTransporter();
-    var mailOptions;
+    var decryption = crypto.createDecipher('aes128', secret_key);
 
+    var mailOptions;
     pool.getConnection(function(err, conn) {
         if (err) {
             res.status(500).send(msg(1, 'Connection Error'));
@@ -173,8 +187,16 @@ function findPw(req, res) {
                             if (rows.length < 1) {
                                 callback(msg(1, 'not user'));
                             } else {
-                                user_pw = rows[0].passwd;
-                                mailOptions = eManager.mailOptions(req.body.user_id, user_pw);
+                                console.log(rows[0].passwd);
+                                decryption.update(rows[0].passwd,'binary','base64');
+                                var decrypted=decryption.final('base64');
+                            /*    b=decrypted;
+                                if(a==b) console.log("맞는데~~~");
+                                else {console.log('aaaaaaaaaa:'+a+'\n');
+                                console.log('bbbbbbbb:'+b+'\n');
+                              }*/
+                                console.log(decrypted);
+                                mailOptions = eManager.mailOptions(req.body.user_id, decrypted);
                                 callback(null, 'user');
                             }
                         }
