@@ -124,57 +124,85 @@ function info(req, res) {
             sql1 = 'select  m.music_id, m.title, m.lyrics,  m.genre, a.album_id, a.album_name, a.album_info, a.album_image_url, a.sale_date,  m.music_url from album a join music m on a.album_id=m.album_id where m.music_id=?;'
             sql2 = 'select count(*) as likes from music_like where music_id=?;'
             sql3 = 'select r.role_num, r.musician_id, m.musician_name from role r join musician m on r.musician_id=m.musician_id where r.music_id=?'
+            musicCheckQuery = 'select title from music where music_id=?';
 
-            async.parallel([
-                    function(callback) {
-                        connection.query(sql1, [musicid],
-                            function(err, rows) {
-                                if (err) {
-                                    callback(err);
-                                } else {
-                                    callback(null, rows[0]);
-                                }
-                            });
-                    },
-                    function(callback) {
-                        connection.query(sql2, [musicid],
-                            function(err, rows) {
-                                if (err) {
-                                    callback(err);
-                                } else {
-                                    callback(null, rows);
+            async.series([
+              function(call){
+                connection.query(musicCheckQuery, musicid, function(err, rows){
+                  if(err){
+                    call(msg(1,{}));
+                    console.log('musicCheckQuery err: ' + err);
+                  } else if(rows.length<1){
+                    console.log('music rows length' + rows.length);
+                    call(msg(1,{}));
+                    console.log('music_id is not correct');
+                  } else {
+                    call(null, 'true');
+                    console.log('music check ok');
+                  }
+                });
+              },
+              function(call){
+                async.parallel([
+                        function(callback) {
+                            connection.query(sql1, [musicid],
+                                function(err, rows) {
+                                    if (err) {
+                                        callback(err);
+                                    } else {
+                                        callback(null, rows[0]);
+                                    }
+                                });
+                        },
+                        function(callback) {
+                            connection.query(sql2, [musicid],
+                                function(err, rows) {
+                                    if (err) {
+                                        callback(err);
+                                    } else {
+                                        callback(null, rows);
 
-                                }
-                            });
-                    },
+                                    }
+                                });
+                        },
 
-                    function(callback) {
-                        connection.query(sql3, [musicid],
-                            function(err, rows) {
-                                if (err) {
-                                    callback(err);
-                                } else {
-                                    callback(null, rows);
+                        function(callback) {
+                            connection.query(sql3, [musicid],
+                                function(err, rows) {
+                                    if (err) {
+                                        callback(err);
+                                    } else {
+                                        callback(null, rows);
 
-                                }
-                            });
+                                    }
+                                });
+                        }
+
+
+                    ],
+                    function(err, result) {
+                        if (err) {
+
+                            res.send(err);
+                        } else {
+                            data = result[0];
+                            data.likes = result[1][0].likes;
+                            data.composers = result[2];
+                            call(null,(msg(0, data)));
+
+                        }
                     }
+                );
+              }
 
+            ], function(err,result){
+              if(err) res.status(500).send(err);
+              else {
+                res.status(200).send(result[1]);
+              }
+              connection.release();
+            });
 
-                ],
-                function(err, result) {
-                    if (err) {
-                        connection.release();
-                        res.send(err);
-                    } else {
-                        data = result[0];
-                        data.likes = result[1][0].likes;
-                        data.composers = result[2];
-                        res.status(200).send(msg(0, data));
-                        connection.release();
-                    }
-                }
-            );
         }
     });
 }
