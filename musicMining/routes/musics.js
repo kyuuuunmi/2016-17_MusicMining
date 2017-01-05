@@ -9,8 +9,8 @@ var pool = mysql.createPool(db_config);
 
 router.route('/')
     .post(like)
-    .delete(unlike)
-    router.route('/')
+    .delete(unlike);
+router.route('/:music_id')
     .get(info)
 
 function like(req, res) {
