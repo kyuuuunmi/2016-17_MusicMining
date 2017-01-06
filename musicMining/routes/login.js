@@ -148,16 +148,16 @@ function receiveMail(req, res) {
     console.log(registUserValue);
     pool.getConnection(function(err, conn) {
         if (err) {
-            res.status(500).send('<h2>DB 연결 에러;; 미안<h2>');
+            res.status(500).send('<h2>Database connection error.<h2>');
             console.log('db connection err: ' + err);
         } else {
             if (req.query.checksum == checksum) {
 
                 conn.query(registUserQuery, registUserValue, function(err, rows) {
-                    if (err) res.status(500).send('<h2>DB 쿼리 에러</h2>');
+                    if (err) res.status(500).send('<h2>Database query error.</h2>');
                     else res.render('registered');
                 });
-            } else res.status(500).send('<h2>회원가입 실패, 경로가 틀림</h2>');
+            } else res.status(500).send('<h2>Fail to register due to wrong path.</h2>');
         }
     });
 }

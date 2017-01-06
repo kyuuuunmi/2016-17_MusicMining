@@ -19,9 +19,9 @@ function EmailManager() {
         return {
             from:     'MusicMining <gusdn6867@naver.com>',
             to:       user_id,
-            subject:  'MusicMining 비밀번호 찾기',
+            subject:  ' [MusicMining] MusicMining 비밀번호 찾기',
             text:     'MusicMining 비밀번호 찾기',
-            html:     'MusicMining<br><br><br> ' + user_id + '님의 비밀번호는 ' + user_pw + '입니다 </a>'
+            html:     'MusicMining 비밀번호 찾기.<br><br><br> ' + user_id + '님의 비밀번호는 ' + user_pw + '입니다. </a>'
         }
     }
 }

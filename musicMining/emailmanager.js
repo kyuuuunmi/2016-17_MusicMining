@@ -30,9 +30,9 @@ function EmailManager() {
         return {
             from:     'MusicMining <gusdn6867@naver.com>',
             to:       user_id,
-            subject:  'MusicMining 회원가입',
-            text:     'MusicMining 회원가입',
-            html:     'MusicMining<br><br><br><a href=' + url + '>Music Mining 회원가입을 위해 이 링크를 클릭해 주세요.</a>',
+            subject:  '[MusicMining] '+name+'님의 MusicMining 회원가입을 환영합니다.',
+            text:     'MusicMining 회원 가입',
+            html:     'MusicMining 회원 가입을 환영합니다.<br><br><br><a href=' + url + '>Music Mining 회원가입을 위해 이 링크를 클릭해 주세요.</a>',
             checksum: checksum
         }
     }
